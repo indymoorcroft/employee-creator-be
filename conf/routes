@@ -1,1 +1,1 @@
-GET     /       controllers.HomeController.index
+GET     /       home.HomeController.index

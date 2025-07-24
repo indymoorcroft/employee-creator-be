@@ -1,4 +1,4 @@
-package employee
+package employee.models
 
 import java.sql.Timestamp
 
