@@ -1,0 +1,31 @@
+# === SBT / Scala ===
+target/
+project/target/
+project/project/
+lib_managed/
+src_managed/
+.idea/
+.cache/
+*.class
+*.log
+*.lock
+.DS_Store
+
+# === IntelliJ ===
+*.iml
+*.ipr
+*.iws
+.idea/
+out/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === Logs / Misc ===
+logs/
+*.log
+*.pid
+*.seed
+
+application.conf
