@@ -1,4 +1,4 @@
-package controllers
+package home
 
 import javax.inject._
 import play.api.mvc._
