@@ -1,6 +1,8 @@
 package employee
 
+import employee.models.Employee
 import slick.jdbc.MySQLProfile.api._
+
 import java.sql.Timestamp
 
 class Employees(tag: Tag) extends Table[Employee](tag, "employees") {
