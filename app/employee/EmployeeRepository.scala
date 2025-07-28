@@ -18,4 +18,8 @@ class EmployeeRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(imp
     db.run(employees.result)
   }
 
+  def findById(id: Long): Future[Option[Employee]] = {
+    db.run(employees.filter(_.id === id).result.headOption)
+  }
+
 }

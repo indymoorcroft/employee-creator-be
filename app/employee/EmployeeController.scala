@@ -14,4 +14,11 @@ class EmployeeController @Inject()(cc: ControllerComponents, employeeService: Em
     }
   }
 
+  def getEmployeeById(id: Long) : Action[AnyContent] = Action.async {
+    employeeService.getEmployeeById(id).map {
+      case Right(employee) => Ok(Json.toJson(employee))
+      case Left(error) => error.toResult
+    }
+  }
+
 }
