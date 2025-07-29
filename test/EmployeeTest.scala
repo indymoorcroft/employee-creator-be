@@ -235,4 +235,43 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerTest with Injecting {
       contentAsString(result) must include ("Bad Request")
     }
   }
+
+  "EmployeeController DELETE /employees" should {
+
+    "delete an employee if exists" in {
+      val request = FakeRequest(DELETE, "/employees/3")
+      val result = route(app, request).get
+
+      // Response returns 204
+      status(result) mustBe NO_CONTENT
+    }
+
+    "return 404 if employee does not exist" in {
+      val request = FakeRequest(DELETE, "/employees/9999")
+      val result = route(app, request).get
+
+      // Response returns 404
+      status(result) mustBe NOT_FOUND
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+
+      // Returns an error
+      (json \ "error").as[String] must include("not found")
+    }
+
+    "return 400 Bad Request for non-numeric ID" in {
+      val request = FakeRequest(DELETE, "/employees/ABC")
+      val result = route(app, request).get
+
+      // Response returns 400
+      status(result) mustBe BAD_REQUEST
+
+      // Response is HTML
+      contentType(result) mustBe Some("text/html")
+      contentAsString(result) must include ("Bad Request")
+    }
+  }
 }
