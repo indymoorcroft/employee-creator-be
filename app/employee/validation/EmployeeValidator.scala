@@ -1,6 +1,6 @@
 package employee.validation
 
-import employee.dtos.CreateEmployeeDto
+import employee.dtos.{CreateEmployeeDto, UpdateEmployeeDto}
 import utils.Validator
 
 object EmployeeValidator extends Validator {
@@ -11,6 +11,16 @@ object EmployeeValidator extends Validator {
       isNotEmpty("email", dto.email),
       isNotEmpty("mobileNumber", dto.mobileNumber),
       isNotEmpty("address", dto.address),
+    ).flatten.toMap
+  }
+
+  def validatePatch(dto: UpdateEmployeeDto): Map[String, String] = {
+    List(
+      isNonBlankIfDefined("firstName", dto.firstName),
+      isNonBlankIfDefined("lastName", dto.lastName),
+      isNonBlankIfDefined("email", dto.email),
+      isNonBlankIfDefined("mobileNumber", dto.mobileNumber),
+      isNonBlankIfDefined("address", dto.address)
     ).flatten.toMap
   }
 }

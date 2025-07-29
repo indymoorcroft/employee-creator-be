@@ -1,6 +1,6 @@
 package employee
 
-import employee.dtos.CreateEmployeeDto
+import employee.dtos.{CreateEmployeeDto, UpdateEmployeeDto}
 import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc._
 import utils.ApiError
@@ -35,5 +35,15 @@ class EmployeeController @Inject()(cc: ControllerComponents, employeeService: Em
       case e: JsError =>
         Future.successful(ApiError.InvalidJson(e).toResult)
     }
+  }
+
+  def patchEmployeeById(id: Long) = Action.async(parse.json) { request =>
+    request.body.validate[UpdateEmployeeDto].fold(
+      errors => Future.successful(ApiError.InvalidJson(JsError(errors)).toResult),
+      dto => employeeService.updateEmployeeById(id, dto).map {
+        case Right(response) => Ok(Json.toJson(response))
+        case Left(error) => error.toResult
+      }
+    )
   }
 }
