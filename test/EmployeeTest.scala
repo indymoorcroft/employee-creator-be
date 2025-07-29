@@ -239,7 +239,7 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerTest with Injecting {
   "EmployeeController DELETE /employees" should {
 
     "delete an employee if exists" in {
-      val request = FakeRequest(DELETE, "/employees/3")
+      val request = FakeRequest(DELETE, "/employees/4")
       val result = route(app, request).get
 
       // Response returns 204

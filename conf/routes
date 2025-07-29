@@ -9,3 +9,5 @@ GET /employees/:id employee.EmployeeController.getEmployeeById(id: Long)
 POST /employees employee.EmployeeController.postEmployee
 
 PATCH /employees/:id employee.EmployeeController.patchEmployeeById(id: Long)
+
+DELETE /employees/:id employee.EmployeeController.deleteById(id: Long)

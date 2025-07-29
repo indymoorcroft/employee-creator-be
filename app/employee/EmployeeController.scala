@@ -46,4 +46,11 @@ class EmployeeController @Inject()(cc: ControllerComponents, employeeService: Em
       }
     )
   }
+
+  def deleteById(id: Long) = Action.async {
+    employeeService.deleteEmployeeById(id).map {
+      case Right(_)     => NoContent
+      case Left(error)  => error.toResult
+    }
+  }
 }
