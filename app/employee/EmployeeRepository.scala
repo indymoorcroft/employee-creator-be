@@ -22,4 +22,9 @@ class EmployeeRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(imp
     db.run(employees.filter(_.id === id).result.headOption)
   }
 
+  def create(employee: Employee): Future[Employee] = {
+    val insertQuery = employees returning employees.map(_.id) into ((employee, id) => employee.copy(id = Some(id)))
+    db.run(insertQuery += employee)
+  }
+
 }
