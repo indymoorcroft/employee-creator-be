@@ -1,5 +1,5 @@
 package utils
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.{JsError, Json, Writes}
 import play.api.mvc.Result
 import play.api.mvc.Results
 
@@ -24,5 +24,18 @@ object ApiError {
   case class ValidationError(errors: Map[String, String]) extends ApiError {
     def message: String = "Validation failed"
     def toResult: Result = Results.BadRequest(Json.obj("error" -> message, "validation_errors" -> errors))
+  }
+
+  case class InvalidJson(errors: JsError) extends ApiError {
+
+    def message: String = "Invalid JSON"
+
+    def toResult: Result = {
+      val errorDetails = JsError.toJson(errors)
+      Results.BadRequest(Json.obj(
+        "error" -> message,
+        "details" -> errorDetails
+      ))
+    }
   }
 }

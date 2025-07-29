@@ -8,6 +8,7 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerTest with Injecting {
 
   // GET /employees
   "EmployeeController GET /employees" should {
+
     "return seeded employees as JSON" in {
       val request = FakeRequest(GET, "/employees")
       val result = route(app, request).get
@@ -41,6 +42,7 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerTest with Injecting {
 
   // GET /employees/:id
   "EmployeeController GET /employees/:id" should {
+
     "return correct employee as JSON if found" in {
       val request = FakeRequest(GET, "/employees/2")
       val result = route(app, request).get
@@ -84,6 +86,68 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerTest with Injecting {
 
       // Response returns 400 BAD_REQUEST
       status(result) mustBe BAD_REQUEST
+
+      val json = contentAsJson(result)
+
+      // Returns an error
+      (json \ "error").asOpt[String] must not be empty
     }
   }
+
+  "EmployeeController POST /employees" should {
+
+    "create a new employee and return JSON" in {
+      val payload = Json.obj(
+        "firstName" -> "Izzy",
+        "lastName" -> "Reel",
+        "email" -> "izzy.reel@example.com",
+        "mobileNumber" -> "5432167890",
+        "address" -> "789 Elm Street"
+      )
+
+      val request = FakeRequest(POST, "/employees")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(payload)
+
+      val result = route(app, request).get
+
+      // Response returns 201 CREATED
+      status(result) mustBe CREATED
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+
+      // Returns the correct data
+      (json \ "firstName").as[String] mustBe "Izzy"
+      (json \ "lastName").as[String] mustBe "Reel"
+      (json \ "email").as[String] mustBe "izzy.reel@example.com"
+      (json \ "mobileNumber").as[String] mustBe "5432167890"
+      (json \ "address").as[String] mustBe "789 Elm Street"
+      (json \ "createdAt").asOpt[String] must not be empty
+      (json \ "updatedAt").asOpt[String] must not be empty
+    }
+
+    "return 400 Bad Request if payload is invalid" in {
+      val badPayload = Json.obj(
+        "firstName" -> "Missy",
+        "lastName" -> "Linfo"
+      )
+
+      val request = FakeRequest(POST, "/employees")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(badPayload)
+
+      val result = route(app, request).get
+
+      // Response returns 400 BAD_REQUEST
+      status(result) mustBe BAD_REQUEST
+
+      val json = contentAsJson(result)
+
+      // Returns an error
+      (json \ "error").asOpt[String] must not be empty
+    }
+    }
 }
