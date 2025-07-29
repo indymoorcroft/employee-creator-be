@@ -7,3 +7,5 @@ GET /employees employee.EmployeeController.getAllEmployees
 GET /employees/:id employee.EmployeeController.getEmployeeById(id: Long)
 
 POST /employees employee.EmployeeController.postEmployee
+
+PATCH /employees/:id employee.EmployeeController.patchEmployeeById(id: Long)

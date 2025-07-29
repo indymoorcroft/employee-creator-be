@@ -149,5 +149,90 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerTest with Injecting {
       // Returns an error
       (json \ "error").asOpt[String] must not be empty
     }
+  }
+
+  "EmployeeController PATCH /employees" should {
+
+    "update an existing employee and return JSON" in {
+      val payload = Json.obj(
+        "firstName" -> "Jon Jon",
+        "email" -> "jonjon.doe@example.com",
+      )
+
+      val request = FakeRequest(PATCH, "/employees/1")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(payload)
+
+      val result = route(app, request).get
+
+      // Response returns 200 OK
+      status(result) mustBe OK
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+
+      // Employee is updated correctly
+      (json \ "id").as[Long] mustBe 1
+      (json \ "firstName").as[String] mustBe "Jon Jon"
+      (json \ "email").as[String] mustBe "jonjon.doe@example.com"
     }
+
+    "return 404 if employee is not found" in {
+      val payload = Json.obj("firstName" -> "Ghost")
+
+      val request = FakeRequest(PATCH, "/employees/9999")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(payload)
+
+      val result = route(app, request).get
+
+      // Response returns 404 NOT_FOUND
+      status(result) mustBe NOT_FOUND
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+
+      // Returns an error
+      (json \ "error").as[String] must include("not found")
+    }
+
+    "return 400 Bad Request if payload is invalid" in {
+      val badPayload = Json.obj("email" -> "")
+
+      val request = FakeRequest(PATCH, "/employees/1")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(badPayload)
+
+      val result = route(app, request).get
+
+      // Response returns 400
+      status(result) mustBe BAD_REQUEST
+
+      val json = contentAsJson(result)
+
+      // Returns an error
+      (json \ "error").asOpt[String] must not be empty
+    }
+
+    "return 400 Bad Request if ID is invalid" in {
+      val badPayload = Json.obj("firstName" -> "Test")
+
+      val request = FakeRequest(PATCH, "/employees/ABC")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(badPayload)
+
+      val result = route(app, request).get
+
+      // Response returns 404 NOT_FOUND
+      status(result) mustBe BAD_REQUEST
+
+      // Response is HTML
+      contentType(result) mustBe Some("text/html")
+      contentAsString(result) must include ("Bad Request")
+    }
+  }
 }
