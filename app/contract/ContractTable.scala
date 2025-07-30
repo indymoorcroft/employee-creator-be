@@ -7,7 +7,7 @@ import java.sql.{Date, Timestamp}
 class Contracts(tag: Tag) extends Table[Contract](tag, "contracts") {
 
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-  def employeeId = column[Long]("employee_id")
+  def employeeId = column[Option[Long]]("employee_id")
   def startDate = column[Date]("start_date")
   def endDate = column[Option[Date]]("end_date")
   def contractType = column[String]("contract_type")

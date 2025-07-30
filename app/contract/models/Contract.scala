@@ -4,7 +4,7 @@ import java.sql.{Date, Timestamp}
 
 case class Contract(
                      id: Option[Long] = None,
-                     employeeId: Long,
+                     employeeId: Option[Long],
                      startDate: Date,
                      endDate: Option[Date],
                      contractType: String,
