@@ -1,8 +1,12 @@
 package contract
 
-import contract.dtos.ContractResponse
+import models.Contract
+import contract.dtos.{ContractResponse, CreateContractDto}
+import contract.validation.ContractValidator
 import utils.ApiError
 
+import java.sql.Timestamp
+import java.time.Instant
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -13,6 +17,31 @@ class ContractService @Inject()(contractRepository: ContractRepository)(implicit
     contractRepository.findById(id).map {
       case Some(contract) => Right(ContractResponse.fromModel(contract))
       case None => Left(ApiError.NotFound(s"Contract with id $id not found"))
+    }
+  }
+
+  def createContract(employeeId: Long, data: CreateContractDto): Future[Either[ApiError, ContractResponse]] = {
+    val errors = ContractValidator.validateCreate(data)
+    if(errors.nonEmpty){
+      Future.successful(Left(ApiError.ValidationError(errors)))
+    } else {
+      val now = Timestamp.from(Instant.now())
+
+      val contract = Contract(
+        id = None,
+        employeeId = employeeId,
+        startDate = java.sql.Date.valueOf(data.startDate),
+        endDate = data.endDate.map(java.sql.Date.valueOf),
+        contractType = data.contractType,
+        employmentType = data.employmentType,
+        hoursPerWeek = data.hoursPerWeek,
+        createdAt = now,
+        updatedAt = now
+      )
+
+      contractRepository.create(contract).map { created =>
+        Right(ContractResponse.fromModel(created))
+      }
     }
   }
 }

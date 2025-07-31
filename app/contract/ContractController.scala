@@ -1,13 +1,16 @@
 package contract
 
-import play.api.libs.json.Json
+import contract.dtos.CreateContractDto
+import employee.EmployeeRepository
+import play.api.libs.json.{JsError, JsValue, Json}
 import play.api.mvc._
+import utils.ApiError
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ContractController @Inject()(cc: ControllerComponents, contractService: ContractService)(implicit ec: ExecutionContext) extends AbstractController(cc) {
+class ContractController @Inject()(cc: ControllerComponents, contractService: ContractService, employeeRepository: EmployeeRepository)(implicit ec: ExecutionContext) extends AbstractController(cc) {
 
   def getContractById(id: Long) : Action[AnyContent] = Action.async {
     contractService.getContractById(id).map {
@@ -15,4 +18,23 @@ class ContractController @Inject()(cc: ControllerComponents, contractService: Co
       case Left(error) => error.toResult
     }
   }
+
+  def addContractForEmployee(id: Long) = Action.async(parse.json) { request =>
+    request.body.validate[CreateContractDto].fold(
+      errors => Future.successful(ApiError.InvalidJson(JsError(errors)).toResult),
+      contractData => {
+        employeeRepository.findById(id).flatMap {
+          case Some(_) =>
+            contractService.createContract(id, contractData).map {
+              case Right(contract) => Created(Json.toJson(contract))
+              case Left(error) => error.toResult
+            }
+          case None =>
+            Future.successful(NotFound(Json.obj("error" -> s"Employee with ID $id not found")))
+        }
+      }
+    )
+  }
+
+
 }

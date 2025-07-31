@@ -10,4 +10,9 @@ trait Validator {
       case Some(v) if v.trim.isEmpty => Some(fieldName -> s"$fieldName cannot be blank if provided")
       case _ => None
     }
+
+  def isCorrectValue(fieldName: String, value: String, validValues: Set[String]): Option[(String, String)] = {
+    if (validValues.contains(value)) None
+    else Some(fieldName -> s"invalid $fieldName")
+  }
 }

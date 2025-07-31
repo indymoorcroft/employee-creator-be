@@ -61,7 +61,6 @@ class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
   }
 
   val contractPayload: JsObject = Json.obj(
-    "employeeId" -> 1,
     "startDate" -> "2021-01-01",
     "endDate" -> "2022-12-31",
     "contractType" -> "PERMANENT",
@@ -70,10 +69,10 @@ class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
   )
 
   // POST /contracts/:id
-  "ContractController POST employees/:id/contracts/" should {
+  "ContractController POST employees/:id/contracts" should {
 
     "create a new contract for an employee and return JSON" in {
-      val request = FakeRequest(POST, "employees/1/contracts")
+      val request = FakeRequest(POST, "/employees/1/contracts")
         .withHeaders("Content-Type" -> "application/json")
         .withJsonBody(contractPayload)
 
@@ -88,7 +87,7 @@ class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
       val json = contentAsJson(result)
 
       // Returns the correct data
-      (json \ "employeeId").as[Long] mustBe 3L
+      (json \ "employeeId").as[Long] mustBe 1L
       (json \ "startDate").as[String] mustBe "2021-01-01"
       (json \ "endDate").as[String] mustBe "2022-12-31"
       (json \ "contractType").as[String] mustBe "PERMANENT"
@@ -99,7 +98,7 @@ class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
     }
 
     "return 404 if employee not found" in {
-      val request = FakeRequest(POST, "employees/1/contracts")
+      val request = FakeRequest(POST, "/employees/9999/contracts")
         .withHeaders("Content-Type" -> "application/json")
         .withJsonBody(contractPayload)
 
