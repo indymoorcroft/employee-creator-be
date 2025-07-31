@@ -1,10 +1,11 @@
 import org.scalatestplus.play._
-import org.scalatestplus.play.guice.GuiceOneAppPerTest
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json._
 import play.api.test.Helpers._
 import play.api.test._
+import utils.CleanDatabase
 
-class EmployeeTest extends PlaySpec with GuiceOneAppPerTest with Injecting {
+class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with CleanDatabase {
 
   // GET /employees
   "EmployeeController GET /employees" should {
@@ -87,10 +88,9 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerTest with Injecting {
       // Response returns 400 BAD_REQUEST
       status(result) mustBe BAD_REQUEST
 
-      val json = contentAsJson(result)
-
-      // Returns an error
-      (json \ "error").asOpt[String] must not be empty
+      // Response is HTML
+      contentType(result) mustBe Some("text/html")
+      contentAsString(result) must include ("Bad Request")
     }
   }
 
@@ -274,4 +274,5 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerTest with Injecting {
       contentAsString(result) must include ("Bad Request")
     }
   }
+
 }
