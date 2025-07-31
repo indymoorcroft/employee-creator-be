@@ -1,10 +1,10 @@
 import org.scalatestplus.play._
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
-import play.api.libs.json._
 import play.api.test.Helpers._
 import play.api.test._
+import utils.CleanDatabase
 
-class ContractTest extends PlaySpec with GuiceOneAppPerTest with Injecting {
+class ContractTest extends PlaySpec with GuiceOneAppPerTest with Injecting with CleanDatabase{
 
   // GET /contracts/:id
   "ContractController GET /contracts/:id" should {
