@@ -19,7 +19,19 @@ class ContractController @Inject()(cc: ControllerComponents, contractService: Co
     }
   }
 
-  def addContractForEmployee(id: Long) = Action.async(parse.json) { request =>
+  def getEmployeeContractById(id: Long): Action[AnyContent] = Action.async {
+    employeeRepository.findById(id).flatMap {
+      case None => Future.successful(ApiError.NotFound("Employee not found").toResult)
+      case Some(_) =>
+        contractService.getEmployeeContracts(id).map {
+          case Right(contracts) => Ok(Json.toJson(contracts))
+          case Left(error) => error.toResult
+        }
+    }
+  }
+
+
+  def addContractForEmployee(id: Long): Action[JsValue] = Action.async(parse.json) { request =>
     request.body.validate[CreateContractDto].fold(
       errors => Future.successful(ApiError.InvalidJson(JsError(errors)).toResult),
       contractData => {
@@ -35,6 +47,4 @@ class ContractController @Inject()(cc: ControllerComponents, contractService: Co
       }
     )
   }
-
-
 }
