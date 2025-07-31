@@ -20,6 +20,16 @@ class ContractService @Inject()(contractRepository: ContractRepository)(implicit
     }
   }
 
+  def getEmployeeContracts(id: Long): Future[Either[ApiError, Seq[ContractResponse]]] = {
+    contractRepository.findByEmployeeId(id).map { contracts =>
+      if(contracts.nonEmpty){
+        Right(contracts.map(contract => ContractResponse.fromModel(contract)))
+      } else {
+        Left(ApiError.NotFound("This employee does not have any contracts"))
+      }
+    }
+  }
+
   def createContract(employeeId: Long, data: CreateContractDto): Future[Either[ApiError, ContractResponse]] = {
     val errors = ContractValidator.validateCreate(data)
     if(errors.nonEmpty){

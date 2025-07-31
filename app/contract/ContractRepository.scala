@@ -18,6 +18,10 @@ class ContractRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(imp
     db.run(contracts.filter(_.id === id).result.headOption)
   }
 
+  def findByEmployeeId(id: Long): Future[Seq[Contract]] = {
+    db.run(contracts.filter(_.employeeId === id).result)
+  }
+
   def create(contract: Contract): Future[Contract] = {
     val insertQuery = contracts returning contracts.map(_.id) into ((contract, id) => contract.copy(id = Some(id)))
     db.run(insertQuery += contract)

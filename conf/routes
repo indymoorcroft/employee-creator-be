@@ -17,4 +17,6 @@ DELETE /employees/:id employee.EmployeeController.deleteById(id: Long)
 
 GET /contracts/:id contract.ContractController.getContractById(id: Long)
 
+GET /employees/:id/contracts contract.ContractController.getEmployeeContractById(id: Long)
+
 POST /employees/:id/contracts contract.ContractController.addContractForEmployee(id: Long)
