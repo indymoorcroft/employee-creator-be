@@ -7,9 +7,11 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import employee.Table.employees
 import employee.models.Employee
+import contract.Table.contracts
+import contract.models.Contract
 
-import java.sql.Timestamp
-import java.time.Instant
+import java.sql.{Date, Timestamp}
+import java.time.{Instant, LocalDate}
 
 @Singleton
 class DataSeeder @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
@@ -20,17 +22,35 @@ class DataSeeder @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec
   def seed(): Future[Unit] = {
     val now = Timestamp.from(Instant.now())
 
-    val initialCategories = Seq(
+    val initialEmployees = Seq(
       Employee(None, "John", "Doe", "john.doe@example.com", "1234567890", "123 Main Street", now, now),
       Employee(None, "May", "Jupp", "may.jupp@example.com", "0987654321", "456 Oak Avenue", now, now)
     )
 
+    val setup = for {
+      employeesExist <- employees.exists.result
+      contractsExist <- contracts.exists.result
 
-    val insertIfEmpty = for {
-      exists <- employees.exists.result
-      _ <- if (!exists) employees ++= initialCategories else DBIO.successful(())
+      employeeIds <- if(!employeesExist){
+        val insertQuery = employees returning employees.map(_.id) into ((emp, id) => emp.copy(id = Some(id)))
+        insertQuery ++= initialEmployees
+      } else {
+        employees.result
+      }
+
+      empMap: Map[String, Long] = employeeIds.map(emp => emp.email -> emp.id.get).toMap
+
+      _ <- if (!contractsExist) {
+        val initialContracts = Seq(
+          Contract(None, empMap("john.doe@example.com"), Date.valueOf(LocalDate.of(2023, 1, 1)), None, "PERMANENT", "FULL_TIME", BigDecimal(37.5), now, now),
+          Contract(None, empMap("may.jupp@example.com"), Date.valueOf(LocalDate.of(2024, 5, 1)), Some(Date.valueOf(LocalDate.of(2025, 4, 30))), "CONTRACT", "PART_TIME", BigDecimal(20.0), now, now)
+        )
+        contracts ++= initialContracts
+      } else {
+        DBIO.successful(())
+      }
     } yield ()
 
-    db.run(insertIfEmpty.transactionally)
+    db.run(setup.transactionally)
   }
 }
