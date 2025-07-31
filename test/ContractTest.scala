@@ -1,9 +1,10 @@
 import org.scalatestplus.play._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json._
 import play.api.test.Helpers._
 import play.api.test._
 import utils.CleanDatabase
+
 
 class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with CleanDatabase {
 
@@ -75,18 +76,28 @@ class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
 
       val json = contentAsJson(result)
 
+      // Is a valid JSON array
+      json.validate[JsArray].isSuccess mustBe true
+
+      // Has data
+      val employeeContracts = json.as[JsArray].value
+      employeeContracts.length must be > 0
+
+      // First piece of data is as expected
+      val first = employeeContracts.head
+
       // Returns the correct data
-      (json \ "employeeId").as[Long] mustBe 1L
-      (json \ "startDate").as[String] mustBe "2023-01-01"
-      (json \ "contractType").as[String] mustBe "PERMANENT"
-      (json \ "employmentType").as[String] mustBe "FULL_TIME"
-      (json \ "hoursPerWeek").as[BigDecimal] mustBe 37.5
-      (json \ "createdAt").asOpt[String] must not be empty
-      (json \ "updatedAt").asOpt[String] must not be empty
+      (first \ "employeeId").as[Long] mustBe 1L
+      (first \ "startDate").as[String] mustBe "2023-01-01"
+      (first \ "contractType").as[String] mustBe "PERMANENT"
+      (first \ "employmentType").as[String] mustBe "FULL_TIME"
+      (first \ "hoursPerWeek").as[BigDecimal] mustBe 37.5
+      (first \ "createdAt").asOpt[String] must not be empty
+      (first \ "updatedAt").asOpt[String] must not be empty
     }
 
     "return 404 if employee not found" in {
-      val request = FakeRequest(GET, "employees/9999/contracts")
+      val request = FakeRequest(GET, "/employees/9999/contracts")
       val result = route(app, request).get
 
       // Response returns 404 NOT_FOUND
@@ -100,7 +111,7 @@ class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
     }
 
     "return 400 Bad Request for non-numeric ID" in {
-      val request = FakeRequest(GET, "employees/ABC/contracts")
+      val request = FakeRequest(GET, "/employees/ABC/contracts")
       val result = route(app, request).get
 
       // Response returns 400 BAD_REQUEST
