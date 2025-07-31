@@ -60,6 +60,58 @@ class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
     }
   }
 
+  // GET /employees/:id/contracts
+  "ContractController GET /employees/:id/contracts" should {
+
+    "return contracts of the correct employee as JSON if found" in {
+      val request = FakeRequest(GET, "/employees/1/contracts")
+      val result = route(app, request).get
+
+      // Response returns 200 OK
+      status(result) mustBe OK
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+
+      // Returns the correct data
+      (json \ "employeeId").as[Long] mustBe 1L
+      (json \ "startDate").as[String] mustBe "2023-01-01"
+      (json \ "contractType").as[String] mustBe "PERMANENT"
+      (json \ "employmentType").as[String] mustBe "FULL_TIME"
+      (json \ "hoursPerWeek").as[BigDecimal] mustBe 37.5
+      (json \ "createdAt").asOpt[String] must not be empty
+      (json \ "updatedAt").asOpt[String] must not be empty
+    }
+
+    "return 404 if employee not found" in {
+      val request = FakeRequest(GET, "employees/9999/contracts")
+      val result = route(app, request).get
+
+      // Response returns 404 NOT_FOUND
+      status(result) mustBe NOT_FOUND
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+      (json \ "error").as[String] must include("not found")
+    }
+
+    "return 400 Bad Request for non-numeric ID" in {
+      val request = FakeRequest(GET, "employees/ABC/contracts")
+      val result = route(app, request).get
+
+      // Response returns 400 BAD_REQUEST
+      status(result) mustBe BAD_REQUEST
+
+      // Response is HTML
+      contentType(result) mustBe Some("text/html")
+      contentAsString(result) must include ("Bad Request")
+    }
+  }
+
   val contractPayload: JsObject = Json.obj(
     "startDate" -> "2021-01-01",
     "endDate" -> "2022-12-31",
