@@ -30,7 +30,6 @@ class ContractController @Inject()(cc: ControllerComponents, contractService: Co
     }
   }
 
-
   def addContractForEmployee(id: Long): Action[JsValue] = Action.async(parse.json) { request =>
     request.body.validate[CreateContractDto].fold(
       errors => Future.successful(ApiError.InvalidJson(JsError(errors)).toResult),
