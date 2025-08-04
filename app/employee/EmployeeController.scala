@@ -1,7 +1,7 @@
 package employee
 
 import employee.dtos.{CreateEmployeeDto, UpdateEmployeeDto}
-import play.api.libs.json.{JsError, JsSuccess, Json}
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc._
 import utils.ApiError
 
@@ -24,7 +24,7 @@ class EmployeeController @Inject()(cc: ControllerComponents, employeeService: Em
     }
   }
 
-  def postEmployee = Action.async(parse.json) { request =>
+  def postEmployee: Action[JsValue] = Action.async(parse.json) { request =>
     request.body.validate[CreateEmployeeDto] match {
       case JsSuccess(dto, _) =>
         employeeService.createEmployee(dto).map {
@@ -37,7 +37,7 @@ class EmployeeController @Inject()(cc: ControllerComponents, employeeService: Em
     }
   }
 
-  def patchEmployeeById(id: Long) = Action.async(parse.json) { request =>
+  def patchEmployeeById(id: Long): Action[JsValue] = Action.async(parse.json) { request =>
     request.body.validate[UpdateEmployeeDto].fold(
       errors => Future.successful(ApiError.InvalidJson(JsError(errors)).toResult),
       dto => employeeService.updateEmployeeById(id, dto).map {
@@ -47,7 +47,7 @@ class EmployeeController @Inject()(cc: ControllerComponents, employeeService: Em
     )
   }
 
-  def deleteById(id: Long) = Action.async {
+  def deleteById(id: Long): Action[AnyContent] = Action.async {
     employeeService.deleteEmployeeById(id).map {
       case Right(_)     => NoContent
       case Left(error)  => error.toResult

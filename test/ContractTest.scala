@@ -72,83 +72,6 @@ class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
     }
   }
 
-  // PATCH /contracts/:id
-  "ContractController PATCH /contracts/:id" should {
-
-    "update existing contract and return JSON" in {
-
-      val request = FakeRequest(PATCH, "/contracts/1")
-        .withHeaders("Content-Type" -> "application/json")
-        .withJsonBody(patchPayload)
-
-      val result = route(app, request).get
-
-      // Response returns 200 OK
-      status(result) mustBe OK
-
-      // Response returns JSON
-      contentType(result) mustBe Some("application/json")
-
-      val json = contentAsJson(result)
-
-      // Contract is updated correctly
-      (json \ "id").as[Long] mustBe 1
-      (json \ "endDate").as[String] mustBe "2025-08-01"
-    }
-
-    "return 404 if contract not found" in {
-      val request = FakeRequest(PATCH, "/contracts/9999")
-        .withHeaders("Content-Type" -> "application/json")
-        .withJsonBody(patchPayload)
-
-      val result = route(app, request).get
-
-      // Response returns 404 NOT_FOUND
-      status(result) mustBe NOT_FOUND
-
-      // Response returns JSON
-      contentType(result) mustBe Some("application/json")
-
-      val json = contentAsJson(result)
-
-      // Returns an error
-      (json \ "error").as[String] must include("not found")
-    }
-
-    "return 400 Bad Request if payload is invalid" in {
-      val badPayload = Json.obj("contractType" -> "")
-
-      val request = FakeRequest(PATCH, "/contracts/1")
-        .withHeaders("Content-Type" -> "application/json")
-        .withJsonBody(badPayload)
-
-      val result = route(app, request).get
-
-      // Response returns 400
-      status(result) mustBe BAD_REQUEST
-
-      val json = contentAsJson(result)
-
-      // Returns an error
-      (json \ "error").asOpt[String] must not be empty
-    }
-
-    "return 400 Bad Request for non-numeric ID" in {
-      val request = FakeRequest(PATCH, "/contracts/ABC")
-        .withHeaders("Content-Type" -> "application/json")
-        .withJsonBody(patchPayload)
-
-      val result = route(app, request).get
-
-      // Response returns 400
-      status(result) mustBe BAD_REQUEST
-
-      // Response is HTML
-      contentType(result) mustBe Some("text/html")
-      contentAsString(result) must include ("Bad Request")
-    }
-  }
-
   // GET /employees/:id/contracts
   "ContractController GET /employees/:id/contracts" should {
 
@@ -275,6 +198,123 @@ class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
 
       // Returns an error
       (json \ "error").asOpt[String] must not be empty
+    }
+  }
+
+  // PATCH /contracts/:id
+  "ContractController PATCH /contracts/:id" should {
+
+    "update existing contract and return JSON" in {
+
+      val request = FakeRequest(PATCH, "/contracts/1")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(patchPayload)
+
+      val result = route(app, request).get
+
+      // Response returns 200 OK
+      status(result) mustBe OK
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+
+      // Contract is updated correctly
+      (json \ "id").as[Long] mustBe 1
+      (json \ "endDate").as[String] mustBe "2025-08-01"
+    }
+
+    "return 404 if contract not found" in {
+      val request = FakeRequest(PATCH, "/contracts/9999")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(patchPayload)
+
+      val result = route(app, request).get
+
+      // Response returns 404 NOT_FOUND
+      status(result) mustBe NOT_FOUND
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+
+      // Returns an error
+      (json \ "error").as[String] must include("not found")
+    }
+
+    "return 400 Bad Request if payload is invalid" in {
+      val badPayload = Json.obj("contractType" -> "")
+
+      val request = FakeRequest(PATCH, "/contracts/1")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(badPayload)
+
+      val result = route(app, request).get
+
+      // Response returns 400
+      status(result) mustBe BAD_REQUEST
+
+      val json = contentAsJson(result)
+
+      // Returns an error
+      (json \ "error").asOpt[String] must not be empty
+    }
+
+    "return 400 Bad Request for non-numeric ID" in {
+      val request = FakeRequest(PATCH, "/contracts/ABC")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(patchPayload)
+
+      val result = route(app, request).get
+
+      // Response returns 400
+      status(result) mustBe BAD_REQUEST
+
+      // Response is HTML
+      contentType(result) mustBe Some("text/html")
+      contentAsString(result) must include ("Bad Request")
+    }
+  }
+
+  // DELETE /contract/:id
+  "ContractController DELETE /contracts/:id" should {
+
+    "delete a contract if it exists" in {
+      val request = FakeRequest(DELETE, "/contracts/2")
+      val result = route(app, request).get
+
+      // Response returns 204
+      status(result) mustBe NO_CONTENT
+    }
+
+    "return 404 if contract does not exist" in {
+      val request = FakeRequest(DELETE, "/contracts/9999")
+      val result = route(app, request).get
+
+      // Response returns 404
+      status(result) mustBe NOT_FOUND
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+
+      // Returns an error
+      (json \ "error").as[String] must include("not found")
+    }
+
+    "return 400 Bad Request for non-numeric ID" in {
+      val request = FakeRequest(DELETE, "/contracts/ABC")
+      val result = route(app, request).get
+
+      // Response returns 400
+      status(result) mustBe BAD_REQUEST
+
+      // Response is HTML
+      contentType(result) mustBe Some("text/html")
+      contentAsString(result) must include ("Bad Request")
     }
   }
 }
