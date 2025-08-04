@@ -1,7 +1,7 @@
 package contract
 
 import models.Contract
-import contract.dtos.{ContractResponse, CreateContractDto}
+import contract.dtos.{ContractResponse, CreateContractDto, UpdateContractDto}
 import contract.validation.ContractValidator
 import utils.ApiError
 
@@ -17,6 +17,29 @@ class ContractService @Inject()(contractRepository: ContractRepository)(implicit
     contractRepository.findById(id).map {
       case Some(contract) => Right(ContractResponse.fromModel(contract))
       case None => Left(ApiError.NotFound(s"Contract with id $id not found"))
+    }
+  }
+
+  def updateContractById(id: Long, data: UpdateContractDto): Future[Either[ApiError, ContractResponse]] = {
+    val errors = ContractValidator.validatePatch(data)
+
+    if(errors.nonEmpty){
+      Future.successful(Left(ApiError.ValidationError(errors)))
+    } else {
+      contractRepository.findById(id).flatMap {
+        case None => Future.successful(Left(ApiError.NotFound(s"Contract with id $id not found")))
+        case Some(existing) =>
+          val updated = existing.copy(
+            startDate = data.startDate.map(java.sql.Date.valueOf).getOrElse(existing.startDate),
+            endDate = data.endDate.map(java.sql.Date.valueOf).orElse(existing.endDate),
+            contractType = data.contractType.map(_.trim).getOrElse(existing.contractType),
+            employmentType = data.employmentType.map(_.trim).getOrElse(existing.employmentType),
+            hoursPerWeek = data.hoursPerWeek.getOrElse(existing.hoursPerWeek),
+            updatedAt = Timestamp.from(Instant.now())
+          )
+
+          contractRepository.update(updated).map(c => Right(ContractResponse.fromModel(c)))
+      }
     }
   }
 

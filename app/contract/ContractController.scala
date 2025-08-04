@@ -1,6 +1,6 @@
 package contract
 
-import contract.dtos.CreateContractDto
+import contract.dtos.{CreateContractDto, UpdateContractDto}
 import employee.EmployeeRepository
 import play.api.libs.json.{JsError, JsValue, Json}
 import play.api.mvc._
@@ -17,6 +17,16 @@ class ContractController @Inject()(cc: ControllerComponents, contractService: Co
       case Right(contract) => Ok(Json.toJson(contract))
       case Left(error) => error.toResult
     }
+  }
+
+  def patchContractById(id: Long) = Action.async(parse.json) { request =>
+    request.body.validate[UpdateContractDto].fold(
+      errors => Future.successful(ApiError.InvalidJson(JsError(errors)).toResult),
+      dto => contractService.updateContractById(id, dto).map {
+        case Right(response) => Ok(Json.toJson(response))
+        case Left(error) => error.toResult
+      }
+    )
   }
 
   def getEmployeeContractById(id: Long): Action[AnyContent] = Action.async {

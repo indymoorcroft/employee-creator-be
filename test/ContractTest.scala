@@ -96,7 +96,7 @@ class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
       (json \ "endDate").as[String] mustBe "2025-08-01"
     }
 
-    "return 404 if employee not found" in {
+    "return 404 if contract not found" in {
       val request = FakeRequest(PATCH, "/contracts/9999")
         .withHeaders("Content-Type" -> "application/json")
         .withJsonBody(patchPayload)
@@ -140,7 +140,7 @@ class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
 
       val result = route(app, request).get
 
-      // Response returns 404 NOT_FOUND
+      // Response returns 400
       status(result) mustBe BAD_REQUEST
 
       // Response is HTML
@@ -211,8 +211,8 @@ class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
     }
   }
 
-  // POST /contracts/:id
-  "ContractController POST employees/:id/contracts" should {
+  // POST /employees/contracts/:id
+  "ContractController POST /employees/:id/contracts" should {
 
     "create a new contract for an employee and return JSON" in {
       val request = FakeRequest(POST, "/employees/1/contracts")
