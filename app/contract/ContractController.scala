@@ -19,7 +19,7 @@ class ContractController @Inject()(cc: ControllerComponents, contractService: Co
     }
   }
 
-  def patchContractById(id: Long) = Action.async(parse.json) { request =>
+  def patchContractById(id: Long): Action[JsValue] = Action.async(parse.json) { request =>
     request.body.validate[UpdateContractDto].fold(
       errors => Future.successful(ApiError.InvalidJson(JsError(errors)).toResult),
       dto => contractService.updateContractById(id, dto).map {
@@ -55,5 +55,12 @@ class ContractController @Inject()(cc: ControllerComponents, contractService: Co
         }
       }
     )
+  }
+
+  def deleteContractById(id: Long): Action[AnyContent] = Action.async {
+    contractService.deleteContractById(id).map {
+      case Right(_) => NoContent
+      case Left(error) => error.toResult
+    }
   }
 }
