@@ -7,6 +7,11 @@ import utils.CleanDatabase
 
 class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with CleanDatabase {
 
+  val patchPayload = Json.obj(
+    "firstName" -> "Jon Jon",
+    "email" -> "jonjon.doe@example.com",
+  )
+
   // GET /employees
   "EmployeeController GET /employees" should {
 
@@ -94,6 +99,7 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
     }
   }
 
+  // POST /employees
   "EmployeeController POST /employees" should {
 
     "create a new employee and return JSON" in {
@@ -151,17 +157,13 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
     }
   }
 
+  // PATCH /employees
   "EmployeeController PATCH /employees" should {
 
     "update an existing employee and return JSON" in {
-      val payload = Json.obj(
-        "firstName" -> "Jon Jon",
-        "email" -> "jonjon.doe@example.com",
-      )
-
       val request = FakeRequest(PATCH, "/employees/1")
         .withHeaders("Content-Type" -> "application/json")
-        .withJsonBody(payload)
+        .withJsonBody(patchPayload)
 
       val result = route(app, request).get
 
@@ -180,11 +182,9 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
     }
 
     "return 404 if employee is not found" in {
-      val payload = Json.obj("firstName" -> "Ghost")
-
       val request = FakeRequest(PATCH, "/employees/9999")
         .withHeaders("Content-Type" -> "application/json")
-        .withJsonBody(payload)
+        .withJsonBody(patchPayload)
 
       val result = route(app, request).get
 
@@ -219,11 +219,9 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
     }
 
     "return 400 Bad Request if ID is invalid" in {
-      val badPayload = Json.obj("firstName" -> "Test")
-
       val request = FakeRequest(PATCH, "/employees/ABC")
         .withHeaders("Content-Type" -> "application/json")
-        .withJsonBody(badPayload)
+        .withJsonBody(patchPayload)
 
       val result = route(app, request).get
 
@@ -236,6 +234,7 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
     }
   }
 
+  // DELETE /employees
   "EmployeeController DELETE /employees" should {
 
     "delete an employee if exists" in {

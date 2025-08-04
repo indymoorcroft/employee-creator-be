@@ -8,6 +8,17 @@ import utils.CleanDatabase
 
 class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with CleanDatabase {
 
+  val patchPayload = Json.obj(
+    "endDate" -> "2025-08-01"
+  )
+  val postPayload: JsObject = Json.obj(
+    "startDate" -> "2021-01-01",
+    "endDate" -> "2022-12-31",
+    "contractType" -> "PERMANENT",
+    "employmentType" -> "FULL_TIME",
+    "hoursPerWeek" -> 37.5,
+  )
+
   // GET /contracts/:id
   "ContractController GET /contracts/:id" should {
 
@@ -53,6 +64,83 @@ class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
       val result = route(app, request).get
 
       // Response returns 400 BAD_REQUEST
+      status(result) mustBe BAD_REQUEST
+
+      // Response is HTML
+      contentType(result) mustBe Some("text/html")
+      contentAsString(result) must include ("Bad Request")
+    }
+  }
+
+  // PATCH /contracts/:id
+  "ContractController PATCH /contracts/:id" should {
+
+    "update existing contract and return JSON" in {
+
+      val request = FakeRequest(PATCH, "/contracts/1")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(patchPayload)
+
+      val result = route(app, request).get
+
+      // Response returns 200 OK
+      status(result) mustBe OK
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+
+      // Contract is updated correctly
+      (json \ "id").as[Long] mustBe 1
+      (json \ "endDate").as[String] mustBe "2025-08-01"
+    }
+
+    "return 404 if contract not found" in {
+      val request = FakeRequest(PATCH, "/contracts/9999")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(patchPayload)
+
+      val result = route(app, request).get
+
+      // Response returns 404 NOT_FOUND
+      status(result) mustBe NOT_FOUND
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+
+      // Returns an error
+      (json \ "error").as[String] must include("not found")
+    }
+
+    "return 400 Bad Request if payload is invalid" in {
+      val badPayload = Json.obj("contractType" -> "")
+
+      val request = FakeRequest(PATCH, "/contracts/1")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(badPayload)
+
+      val result = route(app, request).get
+
+      // Response returns 400
+      status(result) mustBe BAD_REQUEST
+
+      val json = contentAsJson(result)
+
+      // Returns an error
+      (json \ "error").asOpt[String] must not be empty
+    }
+
+    "return 400 Bad Request for non-numeric ID" in {
+      val request = FakeRequest(PATCH, "/contracts/ABC")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(patchPayload)
+
+      val result = route(app, request).get
+
+      // Response returns 400
       status(result) mustBe BAD_REQUEST
 
       // Response is HTML
@@ -123,21 +211,13 @@ class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
     }
   }
 
-  val contractPayload: JsObject = Json.obj(
-    "startDate" -> "2021-01-01",
-    "endDate" -> "2022-12-31",
-    "contractType" -> "PERMANENT",
-    "employmentType" -> "FULL_TIME",
-    "hoursPerWeek" -> 37.5,
-  )
-
-  // POST /contracts/:id
-  "ContractController POST employees/:id/contracts" should {
+  // POST /employees/contracts/:id
+  "ContractController POST /employees/:id/contracts" should {
 
     "create a new contract for an employee and return JSON" in {
       val request = FakeRequest(POST, "/employees/1/contracts")
         .withHeaders("Content-Type" -> "application/json")
-        .withJsonBody(contractPayload)
+        .withJsonBody(postPayload)
 
       val result = route(app, request).get
 
@@ -163,7 +243,7 @@ class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
     "return 404 if employee not found" in {
       val request = FakeRequest(POST, "/employees/9999/contracts")
         .withHeaders("Content-Type" -> "application/json")
-        .withJsonBody(contractPayload)
+        .withJsonBody(postPayload)
 
       val result = route(app, request).get
 
