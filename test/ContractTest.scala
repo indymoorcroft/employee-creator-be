@@ -75,6 +75,26 @@ class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
   // GET /employees/:id/contracts
   "ContractController GET /employees/:id/contracts" should {
 
+    "return empty array if existing employee with no contracts is found" in {
+      val request = FakeRequest(GET, "/employees/3/contracts")
+      val result = route(app, request).get
+
+      // Response returns 200 OK
+      status(result) mustBe OK
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+
+      // Is a valid JSON array
+      json.validate[JsArray].isSuccess mustBe true
+
+      // Has data
+      val employeeContracts = json.as[JsArray].value
+      employeeContracts.length mustBe 0
+    }
+
     "return contracts of the correct employee as JSON if found" in {
       val request = FakeRequest(GET, "/employees/1/contracts")
       val result = route(app, request).get

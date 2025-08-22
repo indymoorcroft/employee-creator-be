@@ -45,11 +45,7 @@ class ContractService @Inject()(contractRepository: ContractRepository)(implicit
 
   def getEmployeeContracts(id: Long): Future[Either[ApiError, Seq[ContractResponse]]] = {
     contractRepository.findByEmployeeId(id).map { contracts =>
-      if(contracts.nonEmpty){
         Right(contracts.map(contract => ContractResponse.fromModel(contract)))
-      } else {
-        Left(ApiError.NotFound("This employee does not have any contracts"))
-      }
     }
   }
 

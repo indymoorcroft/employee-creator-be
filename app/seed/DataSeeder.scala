@@ -24,7 +24,8 @@ class DataSeeder @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec
 
     val initialEmployees = Seq(
       Employee(None, "John", "Doe", "john.doe@example.com", "1234567890", "123 Main Street", now, now),
-      Employee(None, "May", "Jupp", "may.jupp@example.com", "0987654321", "456 Oak Avenue", now, now)
+      Employee(None, "May", "Jupp", "may.jupp@example.com", "0987654321", "456 Oak Avenue", now, now),
+      Employee(None, "Paul", "Crest", "paul.crest@example.com", "11029384756", "789 Real Road", now, now)
     )
 
     val setup = for {
