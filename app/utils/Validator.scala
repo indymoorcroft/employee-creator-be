@@ -24,4 +24,16 @@ trait Validator {
     }
   }
 
+  def isValidEmail(field: String, value: String): Option[(String, String)] = {
+   val EmailRegex = """^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$""".r
+    if (EmailRegex.matches(value)) None
+    else Some(field -> s"$field must be a valid email address")
+  }
+
+  def isValidMobile(field: String, value: String): Option[(String, String)] = {
+    val MobileRegex = """^\+?[0-9]{7,15}$""".r
+    if (MobileRegex.matches(value)) None
+    else Some(field -> s"$field must be a valid mobile number")
+  }
+
 }
