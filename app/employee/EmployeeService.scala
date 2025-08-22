@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class EmployeeService @Inject()(employeeRepository: EmployeeRepository)(implicit ec: ExecutionContext) {
 
-  def getAllEmployees(): Future[Seq[EmployeeResponse]] = {
+  def getEmployees: Future[Seq[EmployeeResponse]] = {
     employeeRepository.findAll().map(_.map(EmployeeResponse.fromModel))
   }
 
@@ -29,7 +29,6 @@ class EmployeeService @Inject()(employeeRepository: EmployeeRepository)(implicit
     if(errors.nonEmpty) {
       Future.successful(Left(ApiError.ValidationError(errors)))
     } else {
-      val now = Timestamp.from(Instant.now())
 
       val preSaved = Employee(
         id = None,
@@ -38,15 +37,15 @@ class EmployeeService @Inject()(employeeRepository: EmployeeRepository)(implicit
         email = data.email.trim,
         mobileNumber = data.mobileNumber.trim,
         address = data.address.trim,
-        createdAt = now,
-        updatedAt = now
+        createdAt = now(),
+        updatedAt = now()
       )
 
       employeeRepository.create(preSaved).map(saved => Right(EmployeeResponse.fromModel(saved)))
     }
   }
 
-  def updateEmployeeById(id: Long, data: UpdateEmployeeDto): Future[Either[ApiError, EmployeeResponse]] = {
+  def updateEmployee(id: Long, data: UpdateEmployeeDto): Future[Either[ApiError, EmployeeResponse]] = {
     val errors = EmployeeValidator.validatePatch(data)
 
     if(errors.nonEmpty){
@@ -55,21 +54,13 @@ class EmployeeService @Inject()(employeeRepository: EmployeeRepository)(implicit
       employeeRepository.findById(id).flatMap {
         case None => Future.successful(Left(ApiError.NotFound(s"Employee with id $id not found")))
         case Some(existing) =>
-          val updates = Map(
-            "firstName" -> data.firstName.map(_.trim),
-            "lastName" -> data.lastName.map(_.trim),
-            "email" -> data.email.map(_.trim),
-            "mobileNumber" -> data.mobileNumber.map(_.trim),
-            "address" -> data.address.map(_.trim)
-          ).collect { case (k, Some(v)) => k -> v }
-
           val updated = existing.copy(
-            firstName = updates.getOrElse("firstName", existing.firstName),
-            lastName = updates.getOrElse("lastName", existing.lastName),
-            email = updates.getOrElse("email", existing.email),
-            mobileNumber = updates.getOrElse("mobileNumber", existing.mobileNumber),
-            address = updates.getOrElse("address", existing.address),
-            updatedAt = Timestamp.from(Instant.now())
+            firstName = data.firstName.map(_.trim).getOrElse(existing.firstName),
+            lastName = data.lastName.map(_.trim).getOrElse(existing.lastName),
+            email = data.email.map(_.trim).getOrElse(existing.email),
+            mobileNumber = data.mobileNumber.map(_.trim).getOrElse(existing.mobileNumber),
+            address = data.address.map(_.trim).getOrElse(existing.address),
+            updatedAt = now()
           )
 
           employeeRepository.update(updated).map(e => Right(EmployeeResponse.fromModel(e)))
@@ -77,10 +68,12 @@ class EmployeeService @Inject()(employeeRepository: EmployeeRepository)(implicit
     }
   }
 
-  def deleteEmployeeById(id: Long): Future[Either[ApiError, Unit]] = {
+  def deleteEmployee(id: Long): Future[Either[ApiError, Unit]] = {
     employeeRepository.delete(id).map { rowsAffected =>
       if(rowsAffected > 0) Right(())
       else Left(ApiError.NotFound(s"Employee with id $id not found"))
     }
   }
+
+  private def now(): Timestamp = Timestamp.from(Instant.now())
 }
