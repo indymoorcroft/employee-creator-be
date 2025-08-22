@@ -15,7 +15,7 @@ class EmployeeRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(imp
   import dbConfig._
 
   def findAll(): Future[Seq[Employee]] = {
-    db.run(employees.result)
+    db.run(employees.sortBy(_.updatedAt.desc).result)
   }
 
   def findById(id: Long): Future[Option[Employee]] = {
