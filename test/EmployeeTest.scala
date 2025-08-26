@@ -32,7 +32,7 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
 
       // Matches seeded data length
       val employees = json.as[JsArray].value
-      employees.length mustBe 2
+      employees.length mustBe 3
 
       // First piece of data is as expected
       val first = employees.head

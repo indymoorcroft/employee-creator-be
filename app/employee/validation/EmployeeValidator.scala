@@ -8,8 +8,8 @@ object EmployeeValidator extends Validator {
     List(
       isNotEmpty("firstName", dto.firstName),
       isNotEmpty("lastName", dto.lastName),
-      isNotEmpty("email", dto.email),
-      isNotEmpty("mobileNumber", dto.mobileNumber),
+      isNotEmpty("email", dto.email).orElse(isValidValue("email", dto.email, """^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$""".r)),
+      isNotEmpty("mobileNumber", dto.mobileNumber).orElse(isValidValue("mobileNumber", dto.mobileNumber, """^\+?[0-9]{7,15}$""".r)),
       isNotEmpty("address", dto.address),
     ).flatten.toMap
   }
@@ -18,8 +18,8 @@ object EmployeeValidator extends Validator {
     List(
       isNonBlankIfDefined("firstName", dto.firstName),
       isNonBlankIfDefined("lastName", dto.lastName),
-      isNonBlankIfDefined("email", dto.email),
-      isNonBlankIfDefined("mobileNumber", dto.mobileNumber),
+      dto.email.flatMap(isValidValue("email", _, """^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$""".r)),
+      dto.mobileNumber.flatMap(isValidValue("mobileNumber", _, """^\+?[0-9]{7,15}$""".r)),
       isNonBlankIfDefined("address", dto.address)
     ).flatten.toMap
   }

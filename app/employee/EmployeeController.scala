@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class EmployeeController @Inject()(cc: ControllerComponents, employeeService: EmployeeService)(implicit ec: ExecutionContext) extends AbstractController(cc) {
 
   def getAllEmployees: Action[AnyContent] = Action.async {
-    employeeService.getAllEmployees().map { employees =>
+    employeeService.getEmployees.map { employees =>
       Ok(Json.toJson(employees))
     }
   }
@@ -37,18 +37,18 @@ class EmployeeController @Inject()(cc: ControllerComponents, employeeService: Em
     }
   }
 
-  def patchEmployeeById(id: Long): Action[JsValue] = Action.async(parse.json) { request =>
+  def patchEmployee(id: Long): Action[JsValue] = Action.async(parse.json) { request =>
     request.body.validate[UpdateEmployeeDto].fold(
       errors => Future.successful(ApiError.InvalidJson(JsError(errors)).toResult),
-      dto => employeeService.updateEmployeeById(id, dto).map {
+      dto => employeeService.updateEmployee(id, dto).map {
         case Right(response) => Ok(Json.toJson(response))
         case Left(error) => error.toResult
       }
     )
   }
 
-  def deleteById(id: Long): Action[AnyContent] = Action.async {
-    employeeService.deleteEmployeeById(id).map {
+  def deleteEmployee(id: Long): Action[AnyContent] = Action.async {
+    employeeService.deleteEmployee(id).map {
       case Right(_)     => NoContent
       case Left(error)  => error.toResult
     }
