@@ -26,64 +26,61 @@ class EndToEnd extends AnyFunSuite with BeforeAndAfterAll {
     if (driver != null) driver.quit()
   }
 
+  lazy val webDriverWait: WebDriverWait = new WebDriverWait(driver, Duration.ofSeconds(5))
+
+  def findByXpath(xpath: String): WebElement =
+    webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)))
+
+  def findByName(name: String): WebElement =
+    webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.name(name)))
+
+  def findByTag(tag: String): WebElement =
+    webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.tagName(tag)))
+
   // EmployeeList
   test("User can access homepage and see title") {
     driver.get(baseUrl)
-    val wait = new WebDriverWait(driver, Duration.ofSeconds(5))
-    val h1 = wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("h1")))
+    val h1 = findByTag("h1")
     assert(h1.getText.contains("All Employees"))
   }
 
   test("Add Employee button is visible") {
     driver.get(baseUrl)
-    val wait = new WebDriverWait(driver, Duration.ofSeconds(5))
-    val addButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//button[contains(text(),'Add Employee')]")))
+    val addButton = findByXpath("//button[contains(text(),'Add Employee')]")
     assert(addButton.isDisplayed);
   }
 
   test("Clicking Add Employee button shows the form") {
     driver.get(baseUrl)
-    val wait = new WebDriverWait(driver, Duration.ofSeconds(5))
-    val addButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//button[contains(text(),'Add Employee')]")))
+    val addButton = findByXpath("//button[contains(text(),'Add Employee')]")
     addButton.click();
 
-    val form = wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("form")))
+    val form = findByTag("form")
     assert(form.isDisplayed)
   }
 
   test("User can add a new employee") {
     driver.get(baseUrl)
-    val wait = new WebDriverWait(driver, Duration.ofSeconds(5))
-    val addButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//button[contains(text(),'Add Employee')]")))
+    val addButton = findByXpath("//button[contains(text(),'Add Employee')]")
     addButton.click();
 
-    val firstNameInput = wait.until(ExpectedConditions.presenceOfElementLocated(By.name("firstName")))
-    firstNameInput.sendKeys("Jonathan")
+    findByName("firstName").sendKeys("Jonathan")
+    findByName("lastName").sendKeys("Donathan")
+    findByName("email").sendKeys("jonathan.donathan@example.com")
+    findByName("mobileNumber").sendKeys("+4475411987999")
+    findByName("address").sendKeys("123 Made Up Lane")
 
-    val lastNameInput = wait.until(ExpectedConditions.presenceOfElementLocated(By.name("lastName")))
-    lastNameInput.sendKeys("Donathan")
-
-    val emailInput = wait.until(ExpectedConditions.presenceOfElementLocated(By.name("email")))
-    emailInput.sendKeys("jonathan.donathan@example.com")
-
-    val mobileNumberInput = wait.until(ExpectedConditions.presenceOfElementLocated(By.name("mobileNumber")))
-    mobileNumberInput.sendKeys("+4475411987999")
-
-    val addressInput = wait.until(ExpectedConditions.presenceOfElementLocated(By.name("address")))
-    addressInput.sendKeys("123 Made Up Lane")
-
-    val submitButton = driver.findElement(By.xpath("//button[contains(text(),'Add')]"))
+    val submitButton = findByXpath("//button[contains(text(),'Add')]")
     submitButton.click()
 
-    val newEmployeeCard = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//li[contains(., 'Jonathan Donathan')]")))
+    val newEmployeeCard = findByXpath("//li[contains(., 'Jonathan Donathan')]")
     assert(newEmployeeCard.getText.contains("Jonathan Donathan"))
   }
 
   test("Employees are listed in the UI") {
     driver.get(baseUrl)
-    val wait = new WebDriverWait(driver, Duration.ofSeconds(5))
 
-    val employeeList: WebElement = wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("ul")))
+    val employeeList: WebElement = findByTag("ul")
     val employees = employeeList.findElements(By.tagName("li"))
     assert(employees.size() >= 0);
   }
