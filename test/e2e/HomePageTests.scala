@@ -1,41 +1,10 @@
-import org.scalatest.BeforeAndAfterAll
+package e2e
+
+import org.openqa.selenium.support.ui.ExpectedConditions
+import org.openqa.selenium.{By, WebElement}
 import org.scalatest.funsuite.AnyFunSuite
-import org.openqa.selenium.{By, WebDriver, WebElement}
-import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
-import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
 
-import java.time.Duration
-
-class EndToEnd extends AnyFunSuite with BeforeAndAfterAll {
-
-  var driver: WebDriver = _
-  val baseUrl = "http://localhost:5173"
-
-  override def beforeAll(): Unit = {
-    System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver")
-
-    val options = new ChromeOptions()
-    options.addArguments("--no-sandbox")
-    options.addArguments("--disable-dev-shm-usage")
-     options.addArguments("--headless") // uncomment if running headless
-
-    driver = new ChromeDriver(options)
-  }
-
-  override def afterAll(): Unit = {
-    if (driver != null) driver.quit()
-  }
-
-  lazy val webDriverWait: WebDriverWait = new WebDriverWait(driver, Duration.ofSeconds(5))
-
-  def findByXpath(xpath: String): WebElement =
-    webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)))
-
-  def findByName(name: String): WebElement =
-    webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.name(name)))
-
-  def findByTag(tag: String): WebElement =
-    webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.tagName(tag)))
+class HomePageTests extends AnyFunSuite with SeleniumTestBase {
 
   // EmployeeList
   test("User can access homepage and see title") {
@@ -79,11 +48,44 @@ class EndToEnd extends AnyFunSuite with BeforeAndAfterAll {
 
   test("Employees are listed in the UI") {
     driver.get(baseUrl)
-
     val employeeList: WebElement = findByTag("ul")
     val employees = employeeList.findElements(By.tagName("li"))
     assert(employees.size() >= 0);
   }
 
+  // EmployeeCard
+  test("Employee card displays name, email, and mobile") {
+    driver.get(baseUrl)
+    val employeeCard = findByTag("li")
 
+    val name = employeeCard.findElement(By.xpath(".//p[contains(@class,'text-lg')]")).getText
+    val email = employeeCard.findElement(By.xpath(".//p[contains(.,'Email:')]")).getText
+    val mobile = employeeCard.findElement(By.xpath(".//p[contains(.,'Mobile:')]")).getText
+
+    assert(name.nonEmpty)
+    assert(email.contains("Email:"))
+    assert(mobile.contains("Mobile:"))
+  }
+
+  test("View link navigates to employee details page") {
+    driver.get(baseUrl)
+    val viewLink = findByLinkText("View")
+    viewLink.click()
+
+    assert(driver.getCurrentUrl.contains("/employees/"))
+  }
+
+  // *** MUST be run after 'User can add a new employee' test ***
+  test("Remove button deletes an employee") {
+    driver.get(baseUrl)
+    val employeeCard = findByXpath("//li[contains(., 'Jonathan Donathan')]")
+
+    val removeButton = findByXpath("//button[contains(text(),'Remove')]")
+    removeButton.click()
+
+    webDriverWait.until(ExpectedConditions.stalenessOf(employeeCard))
+
+    val employeeCards = driver.findElements(By.xpath("//li[contains(., 'Jonathan Donathan')]"))
+    assert(employeeCards.isEmpty)
+  }
 }
