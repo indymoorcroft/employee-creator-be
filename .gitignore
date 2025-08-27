@@ -29,3 +29,4 @@ logs/
 *.seed
 
 application.conf
+application.test.conf
