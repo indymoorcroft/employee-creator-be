@@ -12,6 +12,9 @@ lazy val root = (project in file("."))
       "com.typesafe.play" %% "play-slick" % "5.1.0",
       "com.typesafe.play" %% "play-slick-evolutions" % "5.1.0",
       "mysql" % "mysql-connector-java" % "8.0.33",
-      "org.scalatestplus.play" %% "scalatestplus-play" % "6.0.0" % Test
+      "org.scalatestplus.play" %% "scalatestplus-play" % "6.0.0" % Test,
+      "org.scalatest" %% "scalatest" % "3.2.18" % Test,
+      "org.scalatestplus" %% "selenium-4-21" % "3.2.19.0" % Test,
+      "io.github.bonigarcia" % "webdrivermanager" % "5.5.1"
     )
   )

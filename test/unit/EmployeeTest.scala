@@ -1,9 +1,11 @@
+package unit
+
 import org.scalatestplus.play._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json._
 import play.api.test.Helpers._
 import play.api.test._
-import utils.CleanDatabase
+import unit.utils.CleanDatabase
 
 class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with CleanDatabase {
 
