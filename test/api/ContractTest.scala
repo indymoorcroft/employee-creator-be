@@ -1,11 +1,11 @@
-package unit
+package api
 
 import org.scalatestplus.play._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json._
 import play.api.test.Helpers._
 import play.api.test._
-import unit.utils.CleanDatabase
+import api.utils.CleanDatabase
 
 
 class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with CleanDatabase {

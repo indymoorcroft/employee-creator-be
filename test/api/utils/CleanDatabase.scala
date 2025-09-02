@@ -1,4 +1,4 @@
-package unit.utils
+package api.utils
 
 import org.scalatest.{BeforeAndAfterAll, Suite}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite

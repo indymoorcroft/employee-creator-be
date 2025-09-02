@@ -1,4 +1,4 @@
-package e2e
+package fe
 
 import org.openqa.selenium.{By, WebDriver, WebElement}
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
@@ -10,6 +10,7 @@ import java.time.Duration
 trait SeleniumTestBase extends BeforeAndAfterAll{ this: Suite =>
   var driver: WebDriver = _
   val baseUrl = "http://localhost:5173"
+  val employeeUrl = s"${baseUrl}/employees/1"
 
   override def beforeAll(): Unit = {
     System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver")
@@ -39,4 +40,17 @@ trait SeleniumTestBase extends BeforeAndAfterAll{ this: Suite =>
 
   def findByLinkText(link: String): WebElement =
     webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.linkText(link)))
+
+  def clickButton(text: String): Unit = {
+  val button: WebElement = findByXpath(s"//button[contains(text(),'${text}')]")
+  button.click()
+  }
+
+  def clickButton(text: String, number: Int): Unit = {
+    val button = webDriverWait.until(
+      ExpectedConditions.elementToBeClickable(
+        By.xpath(s"(//button[contains(text(),'${text}')])[${number}]")
+      ))
+    button.click()
+  }
 }

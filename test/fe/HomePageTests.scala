@@ -1,4 +1,4 @@
-package e2e
+package fe
 
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.{By, WebElement}
@@ -21,8 +21,7 @@ class HomePageTests extends AnyFunSuite with SeleniumTestBase {
 
   test("Clicking Add Employee button shows the form") {
     driver.get(baseUrl)
-    val addButton = findByXpath("//button[contains(text(),'Add Employee')]")
-    addButton.click();
+    clickButton("Add Employee")
 
     val form = findByTag("form")
     assert(form.isDisplayed)
@@ -30,8 +29,7 @@ class HomePageTests extends AnyFunSuite with SeleniumTestBase {
 
   test("User can add a new employee") {
     driver.get(baseUrl)
-    val addButton = findByXpath("//button[contains(text(),'Add Employee')]")
-    addButton.click();
+    clickButton("Add Employee")
 
     findByName("firstName").sendKeys("Jonathan")
     findByName("lastName").sendKeys("Donathan")
@@ -39,8 +37,7 @@ class HomePageTests extends AnyFunSuite with SeleniumTestBase {
     findByName("mobileNumber").sendKeys("+4475411987999")
     findByName("address").sendKeys("123 Made Up Lane")
 
-    val submitButton = findByXpath("//button[contains(text(),'Add')]")
-    submitButton.click()
+    clickButton("Add")
 
     val newEmployeeCard = findByXpath("//li[contains(., 'Jonathan Donathan')]")
     assert(newEmployeeCard.getText.contains("Jonathan Donathan"))
@@ -79,13 +76,12 @@ class HomePageTests extends AnyFunSuite with SeleniumTestBase {
   test("Remove button deletes an employee") {
     driver.get(baseUrl)
     val employeeCard = findByXpath("//li[contains(., 'Jonathan Donathan')]")
-
-    val removeButton = findByXpath("//button[contains(text(),'Remove')]")
-    removeButton.click()
+    clickButton("Remove")
 
     webDriverWait.until(ExpectedConditions.stalenessOf(employeeCard))
 
     val employeeCards = driver.findElements(By.xpath("//li[contains(., 'Jonathan Donathan')]"))
     assert(employeeCards.isEmpty)
   }
+
 }

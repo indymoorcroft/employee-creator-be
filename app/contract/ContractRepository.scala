@@ -19,7 +19,7 @@ class ContractRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(imp
   }
 
   def findByEmployeeId(id: Long): Future[Seq[Contract]] = {
-    db.run(contracts.filter(_.employeeId === id).result)
+    db.run(contracts.filter(_.employeeId === id).sortBy(_.updatedAt.desc).result)
   }
 
   def create(contract: Contract): Future[Contract] = {
