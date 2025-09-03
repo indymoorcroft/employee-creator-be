@@ -15,25 +15,33 @@ class EmployeeRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(imp
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
   import dbConfig._
 
-  def findAllByContractType(contractType: Option[String]): Future[Seq[Employee]] = {
+  def findAll(name: Option[String],contractType: Option[String]): Future[Seq[Employee]] = {
 
-    contractType match {
+    val nameFilter = name match {
+      case Some(name) =>
+        val pattern = s"%${name.toLowerCase}%"
+        employees.filter(e => e.firstName.toLowerCase.like(pattern) || e.lastName.toLowerCase.like(pattern)
+        )
+      case None => employees
+    }
+
+    val query = contractType match {
       case Some("full-time") =>
-        val query = for {
-          (e, c) <- employees join contracts on (_.id === _.employeeId)
+        for {
+          (e, c) <- nameFilter join contracts on (_.id === _.employeeId)
           if c.employmentType === "FULL_TIME"
         } yield e
-        db.run(query.sortBy(_.updatedAt.desc).result)
 
       case Some("part-time") =>
-        val query = for {
-          (e, c) <- employees join contracts on (_.id === _.employeeId)
+        for {
+          (e, c) <- nameFilter join contracts on (_.id === _.employeeId)
           if c.employmentType === "PART_TIME"
         } yield e
-        db.run(query.sortBy(_.updatedAt.desc).result)
 
-      case _ => db.run(employees.sortBy(_.updatedAt.desc).result)
+      case _ => nameFilter
     }
+
+    db.run(query.sortBy(_.updatedAt.desc).result)
 
   }
 
