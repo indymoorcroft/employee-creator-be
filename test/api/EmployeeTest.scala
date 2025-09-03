@@ -107,6 +107,36 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
       (first \ "updatedAt").asOpt[String] must not be empty
     }
 
+    "return filtered employees as JSON when passed expiry" in {
+      val request = FakeRequest(GET, "/employees?expiry=true")
+      val result = route(app, request).get
+
+      // Response returns 200 OK
+      status(result) mustBe OK
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+
+      // Is a valid JSON array
+      json.validate[JsArray].isSuccess mustBe true
+
+      // Matches seeded data length
+      val employees = json.as[JsArray].value
+      employees.length mustBe 1
+
+      // First piece of data is as expected
+      val first = employees.head
+      (first \ "firstName").as[String] mustBe "May"
+      (first \ "lastName").as[String] mustBe "Jupp"
+      (first \ "email").as[String] mustBe "may.jupp@example.com"
+      (first \ "mobileNumber").as[String] mustBe "0987654321"
+      (first \ "address").as[String] mustBe "456 Oak Avenue"
+      (first \ "createdAt").asOpt[String] must not be empty
+      (first \ "updatedAt").asOpt[String] must not be empty
+    }
+
     "return filtered employees as JSON when passed name and contract type" in {
       val request = FakeRequest(GET, "/employees?name=Paul&contractType=full-time")
       val result = route(app, request).get

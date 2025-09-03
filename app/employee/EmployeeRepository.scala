@@ -10,19 +10,35 @@ import scala.concurrent.{ExecutionContext, Future}
 import employee.Table.employees
 import employee.models.Employee
 
+import java.sql.Date
+import java.time.{LocalDate, YearMonth}
+
 @Singleton
 class EmployeeRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
   import dbConfig._
 
-  def findAll(name: Option[String],contractType: Option[String]): Future[Seq[Employee]] = {
+  def findAll(name: Option[String],contractType: Option[String], expiry: Boolean = false): Future[Seq[Employee]] = {
+
+    val expiring = if (expiry) {
+      val ym = YearMonth.from(LocalDate.now())
+      val startOfMonth = Date.valueOf(ym.atDay(1))
+      val endOfMonth = Date.valueOf(ym.atEndOfMonth())
+
+      for {
+        (e, c) <- employees join contracts on (_.id === _.employeeId)
+        if (c.endDate.isDefined && c.endDate >= startOfMonth && c.startDate <= endOfMonth)
+      } yield e
+    } else {
+      employees
+    }
 
     val nameFilter = name match {
       case Some(name) =>
         val pattern = s"%${name.toLowerCase}%"
-        employees.filter(e => e.firstName.toLowerCase.like(pattern) || e.lastName.toLowerCase.like(pattern)
+        expiring.filter(e => e.firstName.toLowerCase.like(pattern) || e.lastName.toLowerCase.like(pattern)
         )
-      case None => employees
+      case None => expiring
     }
 
     val query = contractType match {
@@ -42,7 +58,6 @@ class EmployeeRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(imp
     }
 
     db.run(query.sortBy(_.updatedAt.desc).result)
-
   }
 
   def findById(id: Long): Future[Option[Employee]] = {
