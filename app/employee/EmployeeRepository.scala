@@ -1,5 +1,6 @@
 package employee
 
+import contract.Table.contracts
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 import slick.jdbc.MySQLProfile.api._
@@ -14,8 +15,26 @@ class EmployeeRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(imp
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
   import dbConfig._
 
-  def findAll(): Future[Seq[Employee]] = {
-    db.run(employees.sortBy(_.updatedAt.desc).result)
+  def findAllByContractType(contractType: Option[String]): Future[Seq[Employee]] = {
+
+    contractType match {
+      case Some("full-time") =>
+        val query = for {
+          (e, c) <- employees join contracts on (_.id === _.employeeId)
+          if c.employmentType === "FULL_TIME"
+        } yield e
+        db.run(query.sortBy(_.updatedAt.desc).result)
+
+      case Some("part-time") =>
+        val query = for {
+          (e, c) <- employees join contracts on (_.id === _.employeeId)
+          if c.employmentType === "PART_TIME"
+        } yield e
+        db.run(query.sortBy(_.updatedAt.desc).result)
+
+      case _ => db.run(employees.sortBy(_.updatedAt.desc).result)
+    }
+
   }
 
   def findById(id: Long): Future[Option[Employee]] = {

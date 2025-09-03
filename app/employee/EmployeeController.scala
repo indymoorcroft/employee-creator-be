@@ -11,8 +11,10 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class EmployeeController @Inject()(cc: ControllerComponents, employeeService: EmployeeService)(implicit ec: ExecutionContext) extends AbstractController(cc) {
 
-  def getAllEmployees: Action[AnyContent] = Action.async {
-    employeeService.getEmployees.map { employees =>
+  def getAllEmployees: Action[AnyContent] = Action.async { request =>
+    val contractType: Option[String] = request.getQueryString("contractType")
+
+    employeeService.getEmployees(contractType).map { employees =>
       Ok(Json.toJson(employees))
     }
   }

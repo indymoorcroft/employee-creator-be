@@ -13,8 +13,8 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class EmployeeService @Inject()(employeeRepository: EmployeeRepository)(implicit ec: ExecutionContext) {
 
-  def getEmployees: Future[Seq[EmployeeResponse]] = {
-    employeeRepository.findAll().map(_.map(EmployeeResponse.fromModel))
+  def getEmployees(contractType: Option[String]): Future[Seq[EmployeeResponse]] = {
+    employeeRepository.findAllByContractType(contractType).map(_.map(EmployeeResponse.fromModel))
   }
 
   def getEmployeeById(id: Long): Future[Either[ApiError, EmployeeResponse]] = {
