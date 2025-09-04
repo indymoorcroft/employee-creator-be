@@ -14,8 +14,8 @@ class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
     "endDate" -> "2025-08-01"
   )
   val postPayload: JsObject = Json.obj(
-    "startDate" -> "2021-01-01",
-    "endDate" -> "2022-12-31",
+    "startDate" -> "2024-01-01",
+    "endDate" -> "2025-12-31",
     "contractType" -> "PERMANENT",
     "employmentType" -> "FULL_TIME",
     "hoursPerWeek" -> 37.5,
@@ -183,6 +183,23 @@ class ContractTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
       (json \ "hoursPerWeek").as[BigDecimal] mustBe 37.5
       (json \ "createdAt").asOpt[String] must not be empty
       (json \ "updatedAt").asOpt[String] must not be empty
+    }
+
+    "return 400 Bad Request if contract dates overlap with an existing contract" in {
+      val request = FakeRequest(POST, "/employees/2/contracts")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(postPayload)
+
+      val result = route(app, request).get
+
+      // Response returns 400 BAD_REQUEST
+      status(result) mustBe BAD_REQUEST
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+      (json \ "error").as[String] must include("Validation failed")
     }
 
     "return 404 if employee not found" in {

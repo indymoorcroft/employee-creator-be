@@ -68,11 +68,14 @@ class ContractService @Inject()(contractRepository: ContractRepository)(implicit
         updatedAt = now
       )
 
-      contractRepository.create(contract).map { created =>
-        Right(ContractResponse.fromModel(created))
+      contractRepository.hasOverlap(employeeId, contract.startDate, contract.endDate).flatMap { exists =>
+        if(exists) Future.successful(Left(ApiError.ValidationError(Map("contract" -> "Contract dates are invalid"))))
+        else contractRepository.create(contract).map { created =>
+          Right(ContractResponse.fromModel(created))
+        }
       }
-    }
-  }
+        }
+      }
 
   def deleteContractById(id: Long): Future[Either[ApiError, Unit]] = {
     contractRepository.delete(id).map { rowsAffected =>
