@@ -23,10 +23,10 @@ class DataSeeder @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec
     val now = Timestamp.from(Instant.now())
 
     val initialEmployees = Seq(
-      Employee(None, "John", "Doe", "john.doe@example.com", "1234567890", "123 Main Street", now, now),
-      Employee(None, "May", "Jupp", "may.jupp@example.com", "0987654321", "456 Oak Avenue", now, now),
-      Employee(None, "Paul", "Crest", "paul.crest@example.com", "11029384756", "789 Real Road", now, now),
-      Employee(None, "Paul", "Moore", "paul.moore@example.com", "5647382910", "101 Dalmatian Drive", now, now)
+      Employee(None, "John", "Doe", "john.doe@company.com", "1234567890", "123 Main Street", now, now),
+      Employee(None, "May", "Jupp", "may.jupp@company.com", "0987654321", "456 Oak Avenue", now, now),
+      Employee(None, "Paul", "Crest", "paul.crest@company.com", "11029384756", "789 Real Road", now, now),
+      Employee(None, "Paul", "Moore", "paul.moore@company.com", "5647382910", "101 Dalmatian Drive", now, now)
     )
 
     val setup = for {
@@ -46,9 +46,9 @@ class DataSeeder @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec
         val ym = YearMonth.from(LocalDate.now())
         val endOfMonth   = Date.valueOf(ym.atEndOfMonth())
         val initialContracts = Seq(
-          Contract(None, empMap("john.doe@example.com"), Date.valueOf(LocalDate.of(2023, 1, 1)), None, "PERMANENT", "FULL_TIME", BigDecimal(37.5), now, now),
-          Contract(None, empMap("may.jupp@example.com"), Date.valueOf(LocalDate.of(2024, 5, 1)), Some(endOfMonth), "CONTRACT", "PART_TIME", BigDecimal(20.0), now, now),
-          Contract(None, empMap("paul.moore@example.com"), Date.valueOf(LocalDate.of(2025, 1, 1)), None, "CONTRACT", "FULL_TIME", BigDecimal(32.5), now, now),
+          Contract(None, empMap("john.doe@company.com"), Date.valueOf(LocalDate.of(2023, 1, 1)), None, "PERMANENT", "FULL_TIME", BigDecimal(37.5), now, now),
+          Contract(None, empMap("may.jupp@company.com"), Date.valueOf(LocalDate.of(2024, 5, 1)), Some(endOfMonth), "CONTRACT", "PART_TIME", BigDecimal(20.0), now, now),
+          Contract(None, empMap("paul.moore@company.com"), Date.valueOf(LocalDate.of(2025, 1, 1)), None, "CONTRACT", "FULL_TIME", BigDecimal(32.5), now, now),
         )
         contracts ++= initialContracts
       } else {

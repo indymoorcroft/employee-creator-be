@@ -8,7 +8,7 @@ object EmployeeValidator extends Validator {
     List(
       isNotEmpty("firstName", dto.firstName),
       isNotEmpty("lastName", dto.lastName),
-      isNotEmpty("email", dto.email).orElse(isValidValue("email", dto.email, """^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$""".r)),
+//      isNotEmpty("email", dto.email).orElse(isValidValue("email", dto.email, """^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$""".r)),
       isNotEmpty("mobileNumber", dto.mobileNumber).orElse(isValidValue("mobileNumber", dto.mobileNumber, """^\+?[0-9]{7,15}$""".r)),
       isNotEmpty("address", dto.address),
     ).flatten.toMap

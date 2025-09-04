@@ -69,6 +69,10 @@ class EmployeeRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(imp
     db.run(insertQuery += employee)
   }
 
+  def findByEmail(email: String): Future[Option[Employee]] = {
+    db.run(employees.filter(_.email === email).result.headOption)
+  }
+
   def update(employee: Employee): Future[Employee] = {
     val query = employees.filter(_.id === employee.id.get)
       .map(e => (e.firstName, e.lastName, e.email, e.mobileNumber, e.address, e.updatedAt))

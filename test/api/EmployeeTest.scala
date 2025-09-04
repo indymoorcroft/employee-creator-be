@@ -228,7 +228,6 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
       val payload = Json.obj(
         "firstName" -> "Izzy",
         "lastName" -> "Reel",
-        "email" -> "izzy.reel@example.com",
         "mobileNumber" -> "5432167890",
         "address" -> "789 Elm Street"
       )
@@ -250,9 +249,41 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
       // Returns the correct data
       (json \ "firstName").as[String] mustBe "Izzy"
       (json \ "lastName").as[String] mustBe "Reel"
-      (json \ "email").as[String] mustBe "izzy.reel@example.com"
+      (json \ "email").as[String] mustBe "izzy.reel@company.com"
       (json \ "mobileNumber").as[String] mustBe "5432167890"
       (json \ "address").as[String] mustBe "789 Elm Street"
+      (json \ "createdAt").asOpt[String] must not be empty
+      (json \ "updatedAt").asOpt[String] must not be empty
+    }
+
+    "creating an employee with an existing name creates a new email and return JSON" in {
+      val payload = Json.obj(
+        "firstName" -> "John",
+        "lastName" -> "Doe",
+        "mobileNumber" -> "2910385647",
+        "address" -> "385 Nightmare Street"
+      )
+
+      val request = FakeRequest(POST, "/employees")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(payload)
+
+      val result = route(app, request).get
+
+      // Response returns 201 CREATED
+      status(result) mustBe CREATED
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+
+      // Returns the correct data
+      (json \ "firstName").as[String] mustBe "John"
+      (json \ "lastName").as[String] mustBe "Doe"
+      (json \ "email").as[String] mustBe "john.doe1@company.com"
+      (json \ "mobileNumber").as[String] mustBe "2910385647"
+      (json \ "address").as[String] mustBe "385 Nightmare Street"
       (json \ "createdAt").asOpt[String] must not be empty
       (json \ "updatedAt").asOpt[String] must not be empty
     }
