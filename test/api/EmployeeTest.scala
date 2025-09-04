@@ -11,7 +11,7 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
 
   val patchPayload = Json.obj(
     "firstName" -> "Jon Jon",
-    "email" -> "jonjon.doe@example.com",
+    "email" -> "jonjon.doe@company.com",
   )
 
   // GET /employees
@@ -40,7 +40,7 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
       val first = employees.head
       (first \ "firstName").as[String] mustBe "John"
       (first \ "lastName").as[String] mustBe "Doe"
-      (first \ "email").as[String] mustBe "john.doe@example.com"
+      (first \ "email").as[String] mustBe "john.doe@company.com"
       (first \ "mobileNumber").as[String] mustBe "1234567890"
       (first \ "address").as[String] mustBe "123 Main Street"
       (first \ "createdAt").asOpt[String] must not be empty
@@ -70,7 +70,7 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
       val first = employees.head
       (first \ "firstName").as[String] mustBe "John"
       (first \ "lastName").as[String] mustBe "Doe"
-      (first \ "email").as[String] mustBe "john.doe@example.com"
+      (first \ "email").as[String] mustBe "john.doe@company.com"
       (first \ "mobileNumber").as[String] mustBe "1234567890"
       (first \ "address").as[String] mustBe "123 Main Street"
       (first \ "createdAt").asOpt[String] must not be empty
@@ -100,7 +100,7 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
       val first = employees.head
       (first \ "firstName").as[String] mustBe "May"
       (first \ "lastName").as[String] mustBe "Jupp"
-      (first \ "email").as[String] mustBe "may.jupp@example.com"
+      (first \ "email").as[String] mustBe "may.jupp@company.com"
       (first \ "mobileNumber").as[String] mustBe "0987654321"
       (first \ "address").as[String] mustBe "456 Oak Avenue"
       (first \ "createdAt").asOpt[String] must not be empty
@@ -130,7 +130,7 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
       val first = employees.head
       (first \ "firstName").as[String] mustBe "May"
       (first \ "lastName").as[String] mustBe "Jupp"
-      (first \ "email").as[String] mustBe "may.jupp@example.com"
+      (first \ "email").as[String] mustBe "may.jupp@company.com"
       (first \ "mobileNumber").as[String] mustBe "0987654321"
       (first \ "address").as[String] mustBe "456 Oak Avenue"
       (first \ "createdAt").asOpt[String] must not be empty
@@ -160,7 +160,7 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
       val first = employees.head
       (first \ "firstName").as[String] mustBe "Paul"
       (first \ "lastName").as[String] mustBe "Moore"
-      (first \ "email").as[String] mustBe "paul.moore@example.com"
+      (first \ "email").as[String] mustBe "paul.moore@company.com"
       (first \ "mobileNumber").as[String] mustBe "5647382910"
       (first \ "address").as[String] mustBe "101 Dalmatian Drive"
       (first \ "createdAt").asOpt[String] must not be empty
@@ -187,7 +187,7 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
       (json \ "id").as[Long] mustBe 2L
       (json \ "firstName").as[String] mustBe "May"
       (json \ "lastName").as[String] mustBe "Jupp"
-      (json \ "email").as[String] mustBe "may.jupp@example.com"
+      (json \ "email").as[String] mustBe "may.jupp@company.com"
       (json \ "mobileNumber").as[String] mustBe "0987654321"
       (json \ "address").as[String] mustBe "456 Oak Avenue"
       (json \ "createdAt").asOpt[String] must not be empty
@@ -331,7 +331,7 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
       // Employee is updated correctly
       (json \ "id").as[Long] mustBe 1
       (json \ "firstName").as[String] mustBe "Jon Jon"
-      (json \ "email").as[String] mustBe "jonjon.doe@example.com"
+      (json \ "email").as[String] mustBe "jonjon.doe@company.com"
     }
 
     "return 404 if employee is not found" in {
