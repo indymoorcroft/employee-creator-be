@@ -9,6 +9,9 @@ import scala.concurrent.{ExecutionContext, Future}
 import contract.Table.contracts
 import contract.models.Contract
 
+import java.sql.Date
+import java.time.LocalDate
+
 @Singleton
 class ContractRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
@@ -25,6 +28,15 @@ class ContractRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(imp
   def create(contract: Contract): Future[Contract] = {
     val insertQuery = contracts returning contracts.map(_.id) into ((contract, id) => contract.copy(id = Some(id)))
     db.run(insertQuery += contract)
+  }
+
+  def hasOverlap(employeeId: Long, start: Date, end: Option[Date]): Future[Boolean] = {
+    val query = contracts.filter { c =>
+      c.employeeId === employeeId &&
+        c.startDate <= end &&
+        c.endDate >= start
+    }.exists
+    db.run(query.result)
   }
 
   def update(contract: Contract): Future[Contract] = {
