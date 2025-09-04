@@ -34,7 +34,7 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
 
       // Matches seeded data length
       val employees = json.as[JsArray].value
-      employees.length mustBe 3
+      employees.length mustBe 4
 
       // First piece of data is as expected
       val first = employees.head
@@ -43,6 +43,126 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
       (first \ "email").as[String] mustBe "john.doe@example.com"
       (first \ "mobileNumber").as[String] mustBe "1234567890"
       (first \ "address").as[String] mustBe "123 Main Street"
+      (first \ "createdAt").asOpt[String] must not be empty
+      (first \ "updatedAt").asOpt[String] must not be empty
+    }
+
+    "return filtered employees as JSON when passed contractType" in {
+      val request = FakeRequest(GET, "/employees?contractType=full-time")
+      val result = route(app, request).get
+
+      // Response returns 200 OK
+      status(result) mustBe OK
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+
+      // Is a valid JSON array
+      json.validate[JsArray].isSuccess mustBe true
+
+      // Matches seeded data length
+      val employees = json.as[JsArray].value
+      employees.length mustBe 2
+
+      // Data is as expected
+      val first = employees.head
+      (first \ "firstName").as[String] mustBe "John"
+      (first \ "lastName").as[String] mustBe "Doe"
+      (first \ "email").as[String] mustBe "john.doe@example.com"
+      (first \ "mobileNumber").as[String] mustBe "1234567890"
+      (first \ "address").as[String] mustBe "123 Main Street"
+      (first \ "createdAt").asOpt[String] must not be empty
+      (first \ "updatedAt").asOpt[String] must not be empty
+    }
+
+    "return filtered employees as JSON when passed name" in {
+      val request = FakeRequest(GET, "/employees?name=May")
+      val result = route(app, request).get
+
+      // Response returns 200 OK
+      status(result) mustBe OK
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+
+      // Is a valid JSON array
+      json.validate[JsArray].isSuccess mustBe true
+
+      // Matches seeded data length
+      val employees = json.as[JsArray].value
+      employees.length mustBe 1
+
+      // First piece of data is as expected
+      val first = employees.head
+      (first \ "firstName").as[String] mustBe "May"
+      (first \ "lastName").as[String] mustBe "Jupp"
+      (first \ "email").as[String] mustBe "may.jupp@example.com"
+      (first \ "mobileNumber").as[String] mustBe "0987654321"
+      (first \ "address").as[String] mustBe "456 Oak Avenue"
+      (first \ "createdAt").asOpt[String] must not be empty
+      (first \ "updatedAt").asOpt[String] must not be empty
+    }
+
+    "return filtered employees as JSON when passed expiry" in {
+      val request = FakeRequest(GET, "/employees?expiry=true")
+      val result = route(app, request).get
+
+      // Response returns 200 OK
+      status(result) mustBe OK
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+
+      // Is a valid JSON array
+      json.validate[JsArray].isSuccess mustBe true
+
+      // Matches seeded data length
+      val employees = json.as[JsArray].value
+      employees.length mustBe 1
+
+      // First piece of data is as expected
+      val first = employees.head
+      (first \ "firstName").as[String] mustBe "May"
+      (first \ "lastName").as[String] mustBe "Jupp"
+      (first \ "email").as[String] mustBe "may.jupp@example.com"
+      (first \ "mobileNumber").as[String] mustBe "0987654321"
+      (first \ "address").as[String] mustBe "456 Oak Avenue"
+      (first \ "createdAt").asOpt[String] must not be empty
+      (first \ "updatedAt").asOpt[String] must not be empty
+    }
+
+    "return filtered employees as JSON when passed name and contract type" in {
+      val request = FakeRequest(GET, "/employees?name=Paul&contractType=full-time")
+      val result = route(app, request).get
+
+      // Response returns 200 OK
+      status(result) mustBe OK
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+
+      // Is a valid JSON array
+      json.validate[JsArray].isSuccess mustBe true
+
+      // Matches seeded data length
+      val employees = json.as[JsArray].value
+      employees.length mustBe 1
+
+      // First piece of data is as expected
+      val first = employees.head
+      (first \ "firstName").as[String] mustBe "Paul"
+      (first \ "lastName").as[String] mustBe "Moore"
+      (first \ "email").as[String] mustBe "paul.moore@example.com"
+      (first \ "mobileNumber").as[String] mustBe "5647382910"
+      (first \ "address").as[String] mustBe "101 Dalmatian Drive"
       (first \ "createdAt").asOpt[String] must not be empty
       (first \ "updatedAt").asOpt[String] must not be empty
     }
@@ -108,7 +228,6 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
       val payload = Json.obj(
         "firstName" -> "Izzy",
         "lastName" -> "Reel",
-        "email" -> "izzy.reel@example.com",
         "mobileNumber" -> "5432167890",
         "address" -> "789 Elm Street"
       )
@@ -130,9 +249,41 @@ class EmployeeTest extends PlaySpec with GuiceOneAppPerSuite with Injecting with
       // Returns the correct data
       (json \ "firstName").as[String] mustBe "Izzy"
       (json \ "lastName").as[String] mustBe "Reel"
-      (json \ "email").as[String] mustBe "izzy.reel@example.com"
+      (json \ "email").as[String] mustBe "izzy.reel@company.com"
       (json \ "mobileNumber").as[String] mustBe "5432167890"
       (json \ "address").as[String] mustBe "789 Elm Street"
+      (json \ "createdAt").asOpt[String] must not be empty
+      (json \ "updatedAt").asOpt[String] must not be empty
+    }
+
+    "creating an employee with an existing name creates a new email and return JSON" in {
+      val payload = Json.obj(
+        "firstName" -> "John",
+        "lastName" -> "Doe",
+        "mobileNumber" -> "2910385647",
+        "address" -> "385 Nightmare Street"
+      )
+
+      val request = FakeRequest(POST, "/employees")
+        .withHeaders("Content-Type" -> "application/json")
+        .withJsonBody(payload)
+
+      val result = route(app, request).get
+
+      // Response returns 201 CREATED
+      status(result) mustBe CREATED
+
+      // Response returns JSON
+      contentType(result) mustBe Some("application/json")
+
+      val json = contentAsJson(result)
+
+      // Returns the correct data
+      (json \ "firstName").as[String] mustBe "John"
+      (json \ "lastName").as[String] mustBe "Doe"
+      (json \ "email").as[String] mustBe "john.doe1@company.com"
+      (json \ "mobileNumber").as[String] mustBe "2910385647"
+      (json \ "address").as[String] mustBe "385 Nightmare Street"
       (json \ "createdAt").asOpt[String] must not be empty
       (json \ "updatedAt").asOpt[String] must not be empty
     }

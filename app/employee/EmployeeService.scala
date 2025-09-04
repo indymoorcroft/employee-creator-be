@@ -13,8 +13,8 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class EmployeeService @Inject()(employeeRepository: EmployeeRepository)(implicit ec: ExecutionContext) {
 
-  def getEmployees: Future[Seq[EmployeeResponse]] = {
-    employeeRepository.findAll().map(_.map(EmployeeResponse.fromModel))
+  def getEmployees(name: Option[String], contractType: Option[String], expiry: Boolean): Future[Seq[EmployeeResponse]] = {
+    employeeRepository.findAll(name, contractType, expiry).map(_.map(EmployeeResponse.fromModel))
   }
 
   def getEmployeeById(id: Long): Future[Either[ApiError, EmployeeResponse]] = {
@@ -30,11 +30,23 @@ class EmployeeService @Inject()(employeeRepository: EmployeeRepository)(implicit
       Future.successful(Left(ApiError.ValidationError(errors)))
     } else {
 
+      val email = s"${data.firstName.toLowerCase}.${data.lastName.toLowerCase}@company.com"
+
+      def uniqueEmail(email: String, counter: Int = 1): Future[String] = {
+        employeeRepository.findByEmail(email).flatMap {
+          case Some(_) =>
+            val newEmail = s"${data.firstName.toLowerCase}.${data.lastName.toLowerCase}${counter}@company.com"
+            uniqueEmail(newEmail, counter + 1)
+          case None => Future.successful(email)
+        }
+      }
+
+      uniqueEmail(email).flatMap { finalEmail =>
       val preSaved = Employee(
         id = None,
         firstName = data.firstName.trim,
         lastName = data.lastName.trim,
-        email = data.email.trim,
+        email = finalEmail,
         mobileNumber = data.mobileNumber.trim,
         address = data.address.trim,
         createdAt = now(),
@@ -42,6 +54,7 @@ class EmployeeService @Inject()(employeeRepository: EmployeeRepository)(implicit
       )
 
       employeeRepository.create(preSaved).map(saved => Right(EmployeeResponse.fromModel(saved)))
+      }
     }
   }
 
