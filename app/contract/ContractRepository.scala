@@ -10,7 +10,6 @@ import contract.Table.contracts
 import contract.models.Contract
 
 import java.sql.Date
-import java.time.LocalDate
 
 @Singleton
 class ContractRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {

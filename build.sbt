@@ -15,6 +15,8 @@ lazy val root = (project in file("."))
       "org.scalatestplus.play" %% "scalatestplus-play" % "6.0.0" % Test,
       "org.scalatest" %% "scalatest" % "3.2.18" % Test,
       "org.scalatestplus" %% "selenium-4-21" % "3.2.19.0" % Test,
-      "io.github.bonigarcia" % "webdrivermanager" % "5.5.1"
+      "io.github.bonigarcia" % "webdrivermanager" % "5.5.1",
+      "com.auth0" % "java-jwt" % "4.4.0",
+      "org.mindrot" % "jbcrypt" % "0.4"
     )
   )
