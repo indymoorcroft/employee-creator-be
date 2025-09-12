@@ -13,7 +13,7 @@ class Users(tag: Tag) extends Table[User](tag, "users") {
   def createdAt = column[Timestamp]("created_at")
   def updatedAt = column[Timestamp]("updated_at")
 
-  def * = (id.?, email, passwordHash, createdAt) <>
+  def * = (id.?, email, passwordHash, createdAt, updatedAt) <>
     (User.tupled, User.unapply)
 }
 
