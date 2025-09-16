@@ -13,6 +13,10 @@ object ApiError {
     def toResult: Result = Results.BadRequest(Json.obj("error" -> message))
   }
 
+  case class Unauthorized(message: String) extends ApiError {
+    def toResult: Result = Results.Unauthorized(Json.obj("error" -> message))
+  }
+
   case class NotFound(message: String) extends ApiError {
     def toResult: Result = Results.NotFound(Json.obj("error" -> message))
   }

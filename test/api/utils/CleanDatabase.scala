@@ -24,6 +24,7 @@ trait CleanDatabase extends BeforeAndAfterAll { self: Suite with GuiceOneAppPerS
       sqlu"SET FOREIGN_KEY_CHECKS = 0",
       sqlu"TRUNCATE TABLE contracts",
       sqlu"TRUNCATE TABLE employees",
+      sqlu"TRUNCATE TABLE users",
       sqlu"SET FOREIGN_KEY_CHECKS = 1"
     )
 

@@ -24,3 +24,10 @@ POST /employees/:id/contracts contract.ContractController.addContractForEmployee
 PATCH /contracts/:id contract.ContractController.patchContractById(id: Long)
 
 DELETE /contracts/:id contract.ContractController.deleteContractById(id: Long)
+
+
+# Auth
+
+POST /auth/register user.auth.AuthController.register
+
+POST /auth/login user.auth.AuthController.login
